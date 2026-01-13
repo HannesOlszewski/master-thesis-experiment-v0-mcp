@@ -14,14 +14,18 @@ export function LoginForm() {
   const error = searchParams.get("error")
   const [isLoading, setIsLoading] = useState(false)
   const [isConfigured, setIsConfigured] = useState<boolean | null>(null)
+  const [configDetails, setConfigDetails] = useState<any>(null)
 
   useEffect(() => {
     const checkConfig = async () => {
       try {
-        const response = await fetch("/api/auth/providers")
-        const providers = await response.json()
-        setIsConfigured(Object.keys(providers).length > 0 && providers.keycloak)
-      } catch {
+        const response = await fetch("/api/auth/config-check")
+        const config = await response.json()
+        console.log("[v0] Config check result:", config)
+        setConfigDetails(config)
+        setIsConfigured(config.isConfigured)
+      } catch (err) {
+        console.error("[v0] Config check failed:", err)
         setIsConfigured(false)
       }
     }
@@ -33,7 +37,7 @@ export function LoginForm() {
     try {
       await signIn("keycloak", { callbackUrl: "/dashboard" })
     } catch (error) {
-      console.error("Login error:", error)
+      console.error("[v0] Login error:", error)
       setIsLoading(false)
     }
   }
@@ -61,12 +65,26 @@ export function LoginForm() {
           </Alert>
         )}
 
-        {isConfigured === false && (
+        {isConfigured === false && configDetails && (
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Setup Required:</strong> Please configure Keycloak environment variables in the Vars section to
-              enable authentication.
+            <AlertDescription className="space-y-2">
+              <strong>Setup Required:</strong> Please configure the following environment variables in the Vars section:
+              <ul className="list-disc list-inside text-xs mt-2 space-y-1">
+                {!configDetails.hasNextAuthSecret && <li>NEXTAUTH_SECRET</li>}
+                {!configDetails.hasKeycloakClientId && <li>KEYCLOAK_CLIENT_ID</li>}
+                {!configDetails.hasKeycloakClientSecret && <li>KEYCLOAK_CLIENT_SECRET</li>}
+                {!configDetails.hasKeycloakIssuer && <li>KEYCLOAK_ISSUER</li>}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isConfigured === true && (
+          <Alert className="bg-green-50 border-green-200">
+            <AlertCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <strong>Ready:</strong> Authentication is configured. You can now sign in.
             </AlertDescription>
           </Alert>
         )}

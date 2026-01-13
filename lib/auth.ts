@@ -2,14 +2,28 @@ import NextAuth from "next-auth"
 import Keycloak from "next-auth/providers/keycloak"
 import type { NextAuthConfig } from "next-auth"
 
+console.log("[v0] Auth config loading, checking environment variables...")
+console.log("[v0] NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET)
+console.log("[v0] KEYCLOAK_CLIENT_ID exists:", !!process.env.KEYCLOAK_CLIENT_ID)
+console.log("[v0] KEYCLOAK_CLIENT_SECRET exists:", !!process.env.KEYCLOAK_CLIENT_SECRET)
+console.log("[v0] KEYCLOAK_ISSUER exists:", !!process.env.KEYCLOAK_ISSUER)
+
+const isKeycloakConfigured = !!(
+  process.env.KEYCLOAK_CLIENT_ID &&
+  process.env.KEYCLOAK_CLIENT_SECRET &&
+  process.env.KEYCLOAK_ISSUER
+)
+
+console.log("[v0] Keycloak configured:", isKeycloakConfigured)
+
 const providers = []
 
-if (process.env.KEYCLOAK_CLIENT_ID && process.env.KEYCLOAK_CLIENT_SECRET && process.env.KEYCLOAK_ISSUER) {
+if (isKeycloakConfigured) {
   providers.push(
     Keycloak({
-      clientId: process.env.KEYCLOAK_CLIENT_ID,
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
-      issuer: process.env.KEYCLOAK_ISSUER,
+      clientId: process.env.KEYCLOAK_CLIENT_ID!,
+      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
+      issuer: process.env.KEYCLOAK_ISSUER!,
       authorization: {
         params: {
           scope: "openid email profile",
@@ -20,6 +34,7 @@ if (process.env.KEYCLOAK_CLIENT_ID && process.env.KEYCLOAK_CLIENT_SECRET && proc
 }
 
 const authConfig: NextAuthConfig = {
+  basePath: "/api/auth",
   pages: {
     signIn: "/login",
     error: "/auth/error",
@@ -63,11 +78,11 @@ const authConfig: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET || "development-secret-change-in-production",
-  debug: process.env.NODE_ENV === "development",
+  secret: process.env.NEXTAUTH_SECRET || "development-secret-please-change-in-production-min-32-chars-long",
+  debug: true,
   trustHost: true,
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth(authConfig)
 
-export const isAuthConfigured = providers.length > 0
+export const isAuthConfigured = isKeycloakConfigured
