@@ -2,19 +2,11 @@ import NextAuth from "next-auth"
 import Keycloak from "next-auth/providers/keycloak"
 import type { NextAuthConfig } from "next-auth"
 
-console.log("[v0] Auth config loading, checking environment variables...")
-console.log("[v0] NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET)
-console.log("[v0] KEYCLOAK_CLIENT_ID exists:", !!process.env.KEYCLOAK_CLIENT_ID)
-console.log("[v0] KEYCLOAK_CLIENT_SECRET exists:", !!process.env.KEYCLOAK_CLIENT_SECRET)
-console.log("[v0] KEYCLOAK_ISSUER exists:", !!process.env.KEYCLOAK_ISSUER)
-
 const isKeycloakConfigured = !!(
   process.env.KEYCLOAK_CLIENT_ID &&
   process.env.KEYCLOAK_CLIENT_SECRET &&
   process.env.KEYCLOAK_ISSUER
 )
-
-console.log("[v0] Keycloak configured:", isKeycloakConfigured)
 
 const providers = []
 
@@ -79,7 +71,7 @@ const authConfig: NextAuthConfig = {
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET || "development-secret-please-change-in-production-min-32-chars-long",
-  debug: true,
+  useSecureCookies: process.env.NODE_ENV === "production",
   trustHost: true,
 }
 

@@ -19,9 +19,8 @@ export function LoginForm() {
   useEffect(() => {
     const checkConfig = async () => {
       try {
-        const response = await fetch("/api/auth/config-check")
+        const response = await fetch("/api/config-check")
         const config = await response.json()
-        console.log("[v0] Config check result:", config)
         setConfigDetails(config)
         setIsConfigured(config.isConfigured)
       } catch (err) {
@@ -35,10 +34,19 @@ export function LoginForm() {
   const handleLogin = async () => {
     setIsLoading(true)
     try {
-      await signIn("keycloak", { callbackUrl: "/dashboard" })
+      const result = await signIn("keycloak", {
+        callbackUrl: "/dashboard",
+        redirect: true,
+      })
+
+      if (result?.error) {
+        console.error("[v0] Login error:", result.error)
+      }
     } catch (error) {
-      console.error("[v0] Login error:", error)
-      setIsLoading(false)
+      console.error("[v0] Login exception:", error)
+    } finally {
+      // Don't set loading to false if redirecting
+      // setIsLoading(false)
     }
   }
 
@@ -60,7 +68,7 @@ export function LoginForm() {
                 ? "This email is already associated with another account."
                 : error === "Configuration"
                   ? "Authentication is not properly configured. Please set up your environment variables."
-                  : "An error occurred during sign in. Please try again."}
+                  : `An error occurred during sign in: ${error}`}
             </AlertDescription>
           </Alert>
         )}
@@ -84,7 +92,7 @@ export function LoginForm() {
           <Alert className="bg-green-50 border-green-200">
             <AlertCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
-              <strong>Ready:</strong> Authentication is configured. You can now sign in.
+              <strong>Ready:</strong> All environment variables are configured. Click below to sign in.
             </AlertDescription>
           </Alert>
         )}
@@ -95,7 +103,7 @@ export function LoginForm() {
           className="w-full bg-[#6B8E7F] hover:bg-[#5A7A6C] text-white disabled:opacity-50"
           size="lg"
         >
-          {isLoading ? "Signing in..." : "Sign in with Keycloak"}
+          {isLoading ? "Redirecting to Keycloak..." : "Sign in with Keycloak"}
         </Button>
         <p className="text-xs text-center text-muted-foreground">
           By signing in, you agree to our Terms of Service and Privacy Policy.
