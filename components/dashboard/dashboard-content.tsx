@@ -84,7 +84,8 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
     }
   }, [isDemo])
 
-  const parsePercent = (value: string | number): number => {
+  const parsePercent = (value: string | number | undefined): number => {
+    if (value === undefined || value === null) return 0
     if (typeof value === "number") return value
     return Number.parseFloat(value.replace("%", ""))
   }
