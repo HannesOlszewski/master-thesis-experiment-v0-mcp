@@ -19,7 +19,7 @@ const sections = [
 export function Header() {
   const [activeSection, setActiveSection] = useState("hero")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     const observerOptions = {
@@ -84,7 +84,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-          {session?.user ? (
+          {status === "authenticated" && session?.user ? (
             <UserButton user={session.user} />
           ) : (
             <>
@@ -123,7 +123,7 @@ export function Header() {
                 {label}
               </button>
             ))}
-            {session?.user ? (
+            {status === "authenticated" && session?.user ? (
               <Button asChild className="w-full bg-transparent" variant="outline">
                 <Link href="/dashboard">Dashboard</Link>
               </Button>

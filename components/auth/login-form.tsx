@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { signIn } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Image from "next/image"
@@ -13,6 +13,20 @@ export function LoginForm() {
   const searchParams = useSearchParams()
   const error = searchParams.get("error")
   const [isLoading, setIsLoading] = useState(false)
+  const [isConfigured, setIsConfigured] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const checkConfig = async () => {
+      try {
+        const response = await fetch("/api/auth/providers")
+        const providers = await response.json()
+        setIsConfigured(Object.keys(providers).length > 0 && providers.keycloak)
+      } catch {
+        setIsConfigured(false)
+      }
+    }
+    checkConfig()
+  }, [])
 
   const handleLogin = async () => {
     setIsLoading(true)
@@ -23,8 +37,6 @@ export function LoginForm() {
       setIsLoading(false)
     }
   }
-
-  const isKeycloakConfigured = typeof window !== "undefined" && process.env.NEXT_PUBLIC_KEYCLOAK_CONFIGURED === "true"
 
   return (
     <Card className="w-full max-w-md shadow-lg">
@@ -49,7 +61,7 @@ export function LoginForm() {
           </Alert>
         )}
 
-        {!isKeycloakConfigured && (
+        {isConfigured === false && (
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -61,8 +73,8 @@ export function LoginForm() {
 
         <Button
           onClick={handleLogin}
-          disabled={isLoading}
-          className="w-full bg-[#6B8E7F] hover:bg-[#5A7A6C] text-white"
+          disabled={isLoading || isConfigured === false}
+          className="w-full bg-[#6B8E7F] hover:bg-[#5A7A6C] text-white disabled:opacity-50"
           size="lg"
         >
           {isLoading ? "Signing in..." : "Sign in with Keycloak"}

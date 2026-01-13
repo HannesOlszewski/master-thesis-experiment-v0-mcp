@@ -1,6 +1,6 @@
 import type { NextAuthConfig } from "next-auth"
 
-export const authConfig = {
+export const authConfig: NextAuthConfig = {
   pages: {
     signIn: "/login",
     error: "/auth/error",
@@ -44,4 +44,6 @@ export const authConfig = {
   session: {
     strategy: "jwt",
   },
-} satisfies NextAuthConfig
+}
+
+export default authConfig

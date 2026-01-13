@@ -23,4 +23,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   secret: process.env.NEXTAUTH_SECRET || "development-secret-change-in-production",
   providers,
+  debug: process.env.NODE_ENV === "development",
+  trustHost: true,
 })
+
+export const isAuthConfigured = providers.length > 0
