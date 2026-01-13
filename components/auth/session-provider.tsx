@@ -5,7 +5,12 @@ import type { ReactNode } from "react"
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   return (
-    <NextAuthSessionProvider refetchInterval={0} refetchOnWindowFocus={false} refetchWhenOffline={false}>
+    <NextAuthSessionProvider
+      basePath="/api/auth"
+      refetchInterval={0}
+      refetchOnWindowFocus={false}
+      refetchWhenOffline={false}
+    >
       {children}
     </NextAuthSessionProvider>
   )
