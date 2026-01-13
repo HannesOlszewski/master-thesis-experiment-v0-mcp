@@ -5,6 +5,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { UserButton } from "@/components/auth/user-button"
 
 const sections = [
   { id: "hero", label: "Home" },
@@ -17,6 +19,7 @@ const sections = [
 export function Header() {
   const [activeSection, setActiveSection] = useState("hero")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { data: session } = useSession()
 
   useEffect(() => {
     const observerOptions = {
@@ -81,9 +84,18 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <Button onClick={() => scrollToSection("contact")} className="hidden md:flex">
-            Get Started
-          </Button>
+          {session?.user ? (
+            <UserButton user={session.user} />
+          ) : (
+            <>
+              <Button asChild variant="ghost" className="hidden md:flex">
+                <Link href="/login">Sign In</Link>
+              </Button>
+              <Button onClick={() => scrollToSection("contact")} className="hidden md:flex">
+                Get Started
+              </Button>
+            </>
+          )}
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -111,9 +123,20 @@ export function Header() {
                 {label}
               </button>
             ))}
-            <Button onClick={() => scrollToSection("contact")} className="w-full">
-              Get Started
-            </Button>
+            {session?.user ? (
+              <Button asChild className="w-full bg-transparent" variant="outline">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild variant="outline" className="w-full bg-transparent">
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button onClick={() => scrollToSection("contact")} className="w-full">
+                  Get Started
+                </Button>
+              </>
+            )}
           </nav>
         </div>
       )}
