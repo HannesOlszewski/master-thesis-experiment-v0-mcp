@@ -15,7 +15,7 @@ export function AboutSection() {
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="relative aspect-[4/3] overflow-hidden rounded-lg shadow-lg">
-            <Image src="/about.jpg" alt="Our team at work" fill className="object-cover" />
+            <Image src="/images/about.jpg" alt="Our team at work" fill className="object-cover" />
           </div>
           <div className="space-y-6">
             <div>

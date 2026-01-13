@@ -47,7 +47,13 @@ export function HeroSection() {
             </div>
           </div>
           <div className="relative aspect-[4/3] overflow-hidden rounded-lg shadow-lg">
-            <Image src="/hero.jpg" alt="Digital transformation illustration" fill className="object-cover" priority />
+            <Image
+              src="/images/hero.jpg"
+              alt="Digital transformation illustration"
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
         </div>
       </div>

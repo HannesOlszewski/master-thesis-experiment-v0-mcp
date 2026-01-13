@@ -1,6 +1,8 @@
 import { afterEach } from "vitest"
 import { cleanup } from "@testing-library/react"
 import "@testing-library/dom"
+import { vi } from "vitest"
+import type React from "react"
 
 // Cleanup after each test
 afterEach(() => {
@@ -8,10 +10,8 @@ afterEach(() => {
 })
 
 // Mock Next.js Image component
-import { vi } from "vitest"
-
 vi.mock("next/image", () => ({
-  default: (props: any) => {
+  default: (props: Record<string, unknown>) => {
     // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
     return <img {...props} />
   },
@@ -19,7 +19,7 @@ vi.mock("next/image", () => ({
 
 // Mock Next.js Link component
 vi.mock("next/link", () => ({
-  default: ({ children, href, ...props }: any) => {
+  default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => {
     return (
       <a href={href} {...props}>
         {children}
@@ -35,7 +35,7 @@ const localStorageMock = {
   removeItem: vi.fn(),
   clear: vi.fn(),
 }
-global.localStorage = localStorageMock as any
+global.localStorage = localStorageMock as Storage
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
@@ -46,7 +46,7 @@ global.IntersectionObserver = class IntersectionObserver {
     return []
   }
   unobserve() {}
-} as any
+} as unknown as typeof IntersectionObserver
 
 // Mock window.scrollTo
 global.scrollTo = vi.fn()
