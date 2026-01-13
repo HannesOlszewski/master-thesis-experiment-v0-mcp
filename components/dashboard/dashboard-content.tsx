@@ -84,6 +84,11 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
     }
   }, [isDemo])
 
+  const parsePercent = (value: string | number): number => {
+    if (typeof value === "number") return value
+    return Number.parseFloat(value.replace("%", ""))
+  }
+
   const handleLogout = async () => {
     if (isDemo) {
       localStorage.removeItem("demo_user")
@@ -180,7 +185,7 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                 <CardContent>
                   <div className="text-2xl font-bold">${data.financial.revenue.total_revenue.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    ${data.financial.revenue.monthly_revenue.toLocaleString()} this month
+                    ${data.financial.revenue.revenue_this_month.toLocaleString()} this month
                   </p>
                 </CardContent>
               </Card>
@@ -214,9 +219,9 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                       <Cpu className="h-4 w-4 text-[#6B8E7F]" />
                       CPU Usage
                     </span>
-                    <span className="font-medium">{data.system_status.cpu_usage_percent}%</span>
+                    <span className="font-medium">{data.system_health.cpu_usage}</span>
                   </div>
-                  <Progress value={data.system_status.cpu_usage_percent} className="h-2" />
+                  <Progress value={parsePercent(data.system_health.cpu_usage)} className="h-2" />
                 </div>
 
                 <div className="space-y-2">
@@ -225,21 +230,23 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                       <MemoryStick className="h-4 w-4 text-[#6B8E7F]" />
                       Memory Usage
                     </span>
-                    <span className="font-medium">{data.system_status.memory_usage_percent}%</span>
+                    <span className="font-medium">{data.system_health.memory_usage}</span>
                   </div>
-                  <Progress value={data.system_status.memory_usage_percent} className="h-2" />
+                  <Progress value={parsePercent(data.system_health.memory_usage)} className="h-2" />
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2">
-                      <HardDrive className="h-4 w-4 text-[#6B8E7F]" />
-                      Disk Usage
-                    </span>
-                    <span className="font-medium">{data.system_status.disk_usage_percent}%</span>
+                {data.system_health.disk_usage && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2">
+                        <HardDrive className="h-4 w-4 text-[#6B8E7F]" />
+                        Disk Usage
+                      </span>
+                      <span className="font-medium">{data.system_health.disk_usage}</span>
+                    </div>
+                    <Progress value={parsePercent(data.system_health.disk_usage)} className="h-2" />
                   </div>
-                  <Progress value={data.system_status.disk_usage_percent} className="h-2" />
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -260,8 +267,8 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Daily Revenue</span>
-                      <span className="font-semibold">${data.financial.revenue.daily_revenue.toLocaleString()}</span>
+                      <span className="text-sm text-muted-foreground">Today's Revenue</span>
+                      <span className="font-semibold">${data.financial.revenue.revenue_today.toLocaleString()}</span>
                     </div>
                     <Separator />
                   </div>
@@ -269,7 +276,7 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Total Transactions</span>
                       <span className="font-semibold">
-                        {data.financial.transactions.total_transactions.toLocaleString()}
+                        {data.financial.revenue.total_transactions.toLocaleString()}
                       </span>
                     </div>
                     <Separator />
@@ -278,7 +285,7 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Avg Transaction Value</span>
                       <span className="font-semibold">
-                        ${data.financial.transactions.average_transaction_value.toFixed(2)}
+                        ${data.financial.revenue.average_transaction_value.toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -293,12 +300,9 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                 <CardContent>
                   <div className="space-y-3">
                     {data.financial.recent_transactions.slice(0, 5).map((tx) => (
-                      <div
-                        key={tx.transaction_id}
-                        className="flex justify-between items-center py-2 border-b last:border-0"
-                      >
+                      <div key={tx.id} className="flex justify-between items-center py-2 border-b last:border-0">
                         <div>
-                          <p className="text-sm font-medium">{tx.transaction_id}</p>
+                          <p className="text-sm font-medium">{tx.id}</p>
                           <p className="text-xs text-muted-foreground">{tx.user_id}</p>
                         </div>
                         <div className="text-right">

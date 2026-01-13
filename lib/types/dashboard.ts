@@ -1,4 +1,9 @@
 export interface DashboardData {
+  metadata?: {
+    generated_at: string
+    data_freshness: string
+    api_version: string
+  }
   user_statistics: {
     total_users: number
     active_users: number
@@ -16,44 +21,42 @@ export interface DashboardData {
   financial: {
     revenue: {
       total_revenue: number
-      monthly_revenue: number
-      daily_revenue: number
-    }
-    transactions: {
-      total_transactions: number
+      revenue_today: number
+      revenue_this_week: number
+      revenue_this_month: number
       average_transaction_value: number
+      total_transactions: number
+      currency: string
     }
     recent_transactions: Array<{
-      transaction_id: string
-      user_id: string
+      id: string
       amount: number
+      currency: string
+      type: string
       timestamp: string
+      user_id: string
+      status: string
     }>
+    pending_amount: number
+    refund_rate_percent: number
   }
-  system_status: {
-    cpu_usage_percent: number
-    memory_usage_percent: number
-    disk_usage_percent: number
+  system_health: {
+    status: string
+    cpu_usage: string
+    memory_usage: string
+    disk_usage?: string
   }
-  time_series_data?: Array<{
-    timestamp: string
-    value: number
-  }>
-  geographic_data?: {
-    users_by_country: Record<string, number>
-  }
-  activity_feed?: Array<{
-    timestamp: string
-    message: string
-  }>
 }
 
 export interface DashboardEvent {
   event: string
   data: {
     metric?: string
-    value?: number
+    value?: number | string
     status?: string
-    timestamp: string
+    timestamp?: string
+    transaction_id?: string
+    amount?: number
+    [key: string]: unknown
   }
 }
