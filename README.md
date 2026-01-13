@@ -8,10 +8,11 @@ A modern, fully responsive landing page for a digital agency specializing in web
 - 📱 Fully responsive across mobile, tablet, and desktop
 - ⚡ Optimized performance with Next.js 16
 - 🔐 OAuth2 authentication with Keycloak (NextAuth.js v5)
+- 📊 Real-time dashboard with live data from external API
+- 🎭 Demo mode for testing without OAuth setup
 - 🧪 Comprehensive test coverage (80%+)
 - 🔒 Security-focused implementation
 - 🍪 Cookie consent management
-- 📊 Analytics integration with Vercel Analytics
 - ♿ Accessibility-first approach
 
 ## Tech Stack
@@ -21,6 +22,8 @@ A modern, fully responsive landing page for a digital agency specializing in web
 - **Styling:** Tailwind CSS v4
 - **UI Components:** shadcn/ui with Radix UI primitives
 - **Authentication:** NextAuth.js v5 with Keycloak provider
+- **Data Fetching:** SWR for efficient caching
+- **Real-time:** Server-Sent Events (SSE)
 - **Icons:** Lucide React
 - **Testing:** Vitest + Playwright
 - **CI/CD:** GitHub Actions
@@ -32,17 +35,18 @@ A modern, fully responsive landing page for a digital agency specializing in web
 - Node.js 18+ or Bun
 - npm, pnpm, yarn, or bun
 - (Optional) Keycloak instance for OAuth2 authentication
+- (Optional) Access to master-thesis-experiment-api
 
 ### Installation
 
 1. Clone the repository:
-\`\`\`bash
+```bash
 git clone <repository-url>
 cd a-startup-landing-page
-\`\`\`
+```
 
 2. Install dependencies:
-\`\`\`bash
+```bash
 npm install
 # or
 pnpm install
@@ -50,24 +54,30 @@ pnpm install
 yarn install
 # or
 bun install
-\`\`\`
+```
 
-3. Set up environment variables (optional for OAuth):
-\`\`\`bash
+3. Set up environment variables:
+```bash
 cp .env.example .env.local
-\`\`\`
+```
 
-Edit `.env.local` with your Keycloak configuration:
-\`\`\`env
+Edit `.env.local` with your configuration:
+```env
+# OAuth Configuration (Optional - for production auth)
 NEXTAUTH_SECRET=your-secret-here
 KEYCLOAK_CLIENT_ID=your-client-id
 KEYCLOAK_CLIENT_SECRET=your-client-secret
 KEYCLOAK_ISSUER=https://your-keycloak-domain/realms/your-realm
 NEXTAUTH_URL=http://localhost:3000
-\`\`\`
+
+# External API Configuration (Optional - for dashboard data)
+EXPERIMENT_API_URL=https://your-api-domain.com
+EXPERIMENT_API_KEY=your-api-key-here
+EXPERIMENT_API_KEY_DEMO=your-demo-api-key-here
+```
 
 4. Run the development server:
-\`\`\`bash
+```bash
 npm run dev
 # or
 pnpm dev
@@ -75,9 +85,35 @@ pnpm dev
 yarn dev
 # or
 bun dev
-\`\`\`
+```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Dashboard Features
+
+The dashboard displays real-time data from the master-thesis-experiment-api:
+
+- **User Statistics:** Total users, active users, growth metrics
+- **Financial Metrics:** Revenue, transactions, daily/monthly breakdowns
+- **System Status:** CPU, memory, disk usage with progress bars
+- **Live Events:** Real-time SSE stream showing system updates
+- **Recent Transactions:** Latest financial activities
+
+### Demo Mode vs OAuth Mode
+
+**Demo Mode:**
+- Click "Continue in Demo Mode" on the login page
+- Connects to API using `EXPERIMENT_API_KEY_DEMO`
+- Shows real data from the API (demo dataset)
+- No OAuth configuration required
+- Perfect for v0 preview and testing
+
+**OAuth Mode:**
+- Sign in with Keycloak credentials
+- Connects to API using `EXPERIMENT_API_KEY`
+- Shows personalized user data
+- Full authentication and session management
+- Requires stable domain for OAuth redirects
 
 ## Authentication
 
@@ -87,6 +123,7 @@ The application includes a **Demo Mode** that works in the v0 preview environmen
 
 - Click "Continue in Demo Mode" on the login page
 - Access dashboard and profile pages with a simulated user
+- Dashboard connects to real API with demo credentials
 - Perfect for testing the UI and user flows
 
 ### OAuth2 with Keycloak (Production)
@@ -121,7 +158,7 @@ For production deployment with real authentication:
 
 ## Project Structure
 
-\`\`\`
+```
 .
 ├── app/                      # Next.js app directory
 │   ├── layout.tsx           # Root layout with SessionProvider
@@ -132,7 +169,8 @@ For production deployment with real authentication:
 │   ├── auth/                # Auth error pages
 │   ├── api/
 │   │   ├── auth/[...nextauth]/ # NextAuth API routes
-│   │   └── config-check/    # Config validation endpoint
+│   │   ├── config-check/    # Config validation endpoint
+│   │   └── dashboard/       # Dashboard API proxy routes
 │   ├── privacy/             # Privacy policy page
 │   ├── terms/               # Terms of service page
 │   ├── imprint/             # Imprint page
@@ -159,9 +197,12 @@ For production deployment with real authentication:
 │   ├── ui/                  # shadcn/ui components
 │   └── __tests__/           # Component tests
 ├── lib/                     # Utility functions
-│   └── auth.ts              # NextAuth configuration
+│   ├── auth.ts              # NextAuth configuration
+│   └── types/               # TypeScript type definitions
+│       └── dashboard.ts     # Dashboard data types
 ├── docs/                    # Documentation
 │   ├── AUTH_SETUP.md        # Keycloak setup guide
+│   ├── API_INTEGRATION.md   # API integration guide
 │   ├── ARCHITECTURE.md      # Technical architecture
 │   ├── CONTENT_GUIDE.md     # Content management
 │   └── ENVIRONMENT_SETUP.md # Environment configuration
@@ -173,7 +214,7 @@ For production deployment with real authentication:
 ├── vitest.config.ts         # Vitest configuration
 ├── playwright.config.ts     # Playwright configuration
 └── README.md
-\`\`\`
+```
 
 ## Testing
 
@@ -181,15 +222,15 @@ For production deployment with real authentication:
 
 Run unit and integration tests with Vitest:
 
-\`\`\`bash
+```bash
 npm run test
-\`\`\`
+```
 
 View test coverage:
 
-\`\`\`bash
+```bash
 npm run test:coverage
-\`\`\`
+```
 
 The project maintains 80%+ code coverage across:
 - Unit tests for all components
@@ -200,9 +241,9 @@ The project maintains 80%+ code coverage across:
 
 Run e2e tests with Playwright:
 
-\`\`\`bash
+```bash
 npm run test:e2e
-\`\`\`
+```
 
 E2E tests cover:
 - Full user journeys
@@ -238,22 +279,23 @@ All textual content is centralized in component files for easy updates:
 
 1. Push your code to GitHub
 2. Import your repository to Vercel
-3. Vercel will automatically detect Next.js and configure the build
-4. Deploy!
+3. Add environment variables in project settings
+4. Vercel will automatically detect Next.js and configure the build
+5. Deploy!
 
 ### Other Platforms
 
 Build the project:
 
-\`\`\`bash
+```bash
 npm run build
-\`\`\`
+```
 
 The output will be in the `.next` directory. Serve it with:
 
-\`\`\`bash
+```bash
 npm run start
-\`\`\`
+```
 
 ## CI/CD
 
@@ -271,6 +313,8 @@ See `.github/workflows/` for configuration details.
 - OAuth2 authentication with Keycloak
 - JWT-based session management
 - Secure HTTP-only cookies
+- API keys stored server-side only
+- Separate credentials for demo and production modes
 - No sensitive data in client-side code
 - Secure headers configured
 - CSRF protection enabled
@@ -287,10 +331,23 @@ The following environment variables are supported:
 - `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret
 - `KEYCLOAK_ISSUER` - Keycloak realm URL
 
+### Required for Dashboard Data
+- `EXPERIMENT_API_URL` - Base URL of the external API
+- `EXPERIMENT_API_KEY` - API key for authenticated users
+- `EXPERIMENT_API_KEY_DEMO` - API key for demo mode users
+
 ### Optional
 - `NEXTAUTH_URL` - Base URL for NextAuth (auto-detected in most cases)
 
 Set these in the **Vars** section of the v0 in-chat sidebar or in your deployment platform's environment variable settings.
+
+## Documentation
+
+- [AUTH_SETUP.md](docs/AUTH_SETUP.md) - Keycloak configuration guide
+- [API_INTEGRATION.md](docs/API_INTEGRATION.md) - External API integration
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Technical architecture overview
+- [CONTENT_GUIDE.md](docs/CONTENT_GUIDE.md) - Content management guide
+- [ENVIRONMENT_SETUP.md](docs/ENVIRONMENT_SETUP.md) - Environment variables
 
 ## License
 

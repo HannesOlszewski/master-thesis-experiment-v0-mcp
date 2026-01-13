@@ -24,15 +24,17 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
   const router = useRouter()
   const [liveEvents, setLiveEvents] = useState<DashboardEvent[]>([])
 
-  const { data, error, isLoading } = useSWR<DashboardData>(isDemo ? null : "/api/dashboard", fetcher, {
-    refreshInterval: 30000, // Refresh every 30 seconds
-    revalidateOnFocus: true,
-  })
+  const { data, error, isLoading } = useSWR<DashboardData>(
+    isDemo ? "/api/dashboard?demo=true" : "/api/dashboard",
+    fetcher,
+    {
+      refreshInterval: 30000, // Refresh every 30 seconds
+      revalidateOnFocus: true,
+    },
+  )
 
   useEffect(() => {
-    if (isDemo) return
-
-    const eventSource = new EventSource("/api/dashboard/events")
+    const eventSource = new EventSource(isDemo ? "/api/dashboard/events?demo=true" : "/api/dashboard/events")
 
     eventSource.addEventListener("dashboard_update", (e) => {
       const eventData: DashboardEvent = { event: "dashboard_update", data: JSON.parse(e.data) }
@@ -81,12 +83,13 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
           <Alert className="bg-blue-50 border-blue-200">
             <AlertCircle className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800">
-              <strong>Demo Mode:</strong> Viewing demo dashboard. Deploy to enable real data from the API.
+              <strong>Demo Mode:</strong> Viewing real data with demo credentials. Sign in with Keycloak for your
+              personal data.
             </AlertDescription>
           </Alert>
         )}
 
-        {!isDemo && isLoading && (
+        {isLoading && (
           <Card className="shadow-lg">
             <CardContent className="p-6">
               <p className="text-center text-muted-foreground">Loading dashboard data...</p>
@@ -94,7 +97,7 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
           </Card>
         )}
 
-        {!isDemo && error && (
+        {error && (
           <Alert className="bg-red-50 border-red-200">
             <AlertCircle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800">
@@ -103,7 +106,7 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
           </Alert>
         )}
 
-        {(data || isDemo) && (
+        {data && (
           <>
             {/* User Statistics Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -115,11 +118,9 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
-                    {data?.user_statistics.total_users.toLocaleString() || "15,000"}
-                  </div>
+                  <div className="text-2xl font-bold">{data.user_statistics.total_users.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    +{data?.user_statistics.growth.monthly_growth_percent || 15}% from last month
+                    +{data.user_statistics.growth.monthly_growth_percent}% from last month
                   </p>
                 </CardContent>
               </Card>
@@ -132,11 +133,9 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
-                    {data?.user_statistics.active_users.toLocaleString() || "7,500"}
-                  </div>
+                  <div className="text-2xl font-bold">{data.user_statistics.active_users.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {data?.user_statistics.retention_rate_percent || 80}% retention rate
+                    {data.user_statistics.retention_rate_percent}% retention rate
                   </p>
                 </CardContent>
               </Card>
@@ -149,11 +148,9 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
-                    ${(data?.financial.revenue.total_revenue || 500000).toLocaleString()}
-                  </div>
+                  <div className="text-2xl font-bold">${data.financial.revenue.total_revenue.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    ${(data?.financial.revenue.monthly_revenue || 50000).toLocaleString()} this month
+                    ${data.financial.revenue.monthly_revenue.toLocaleString()} this month
                   </p>
                 </CardContent>
               </Card>
@@ -166,9 +163,9 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{data?.user_statistics.new_users_today || 150}</div>
+                  <div className="text-2xl font-bold">{data.user_statistics.new_users_today}</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {data?.user_statistics.new_users_this_week.toLocaleString() || "3,500"} this week
+                    {data.user_statistics.new_users_this_week.toLocaleString()} this week
                   </p>
                 </CardContent>
               </Card>
@@ -187,9 +184,9 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                       <Cpu className="h-4 w-4 text-[#6B8E7F]" />
                       CPU Usage
                     </span>
-                    <span className="font-medium">{data?.system_status.cpu_usage_percent || 45}%</span>
+                    <span className="font-medium">{data.system_status.cpu_usage_percent}%</span>
                   </div>
-                  <Progress value={data?.system_status.cpu_usage_percent || 45} className="h-2" />
+                  <Progress value={data.system_status.cpu_usage_percent} className="h-2" />
                 </div>
 
                 <div className="space-y-2">
@@ -198,9 +195,9 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                       <MemoryStick className="h-4 w-4 text-[#6B8E7F]" />
                       Memory Usage
                     </span>
-                    <span className="font-medium">{data?.system_status.memory_usage_percent || 60}%</span>
+                    <span className="font-medium">{data.system_status.memory_usage_percent}%</span>
                   </div>
-                  <Progress value={data?.system_status.memory_usage_percent || 60} className="h-2" />
+                  <Progress value={data.system_status.memory_usage_percent} className="h-2" />
                 </div>
 
                 <div className="space-y-2">
@@ -209,9 +206,9 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                       <HardDrive className="h-4 w-4 text-[#6B8E7F]" />
                       Disk Usage
                     </span>
-                    <span className="font-medium">{data?.system_status.disk_usage_percent || 75}%</span>
+                    <span className="font-medium">{data.system_status.disk_usage_percent}%</span>
                   </div>
-                  <Progress value={data?.system_status.disk_usage_percent || 75} className="h-2" />
+                  <Progress value={data.system_status.disk_usage_percent} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -227,18 +224,14 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Total Revenue</span>
-                      <span className="font-semibold">
-                        ${(data?.financial.revenue.total_revenue || 500000).toLocaleString()}
-                      </span>
+                      <span className="font-semibold">${data.financial.revenue.total_revenue.toLocaleString()}</span>
                     </div>
                     <Separator />
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Daily Revenue</span>
-                      <span className="font-semibold">
-                        ${(data?.financial.revenue.daily_revenue || 5000).toLocaleString()}
-                      </span>
+                      <span className="font-semibold">${data.financial.revenue.daily_revenue.toLocaleString()}</span>
                     </div>
                     <Separator />
                   </div>
@@ -246,7 +239,7 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Total Transactions</span>
                       <span className="font-semibold">
-                        {(data?.financial.transactions.total_transactions || 15000).toLocaleString()}
+                        {data.financial.transactions.total_transactions.toLocaleString()}
                       </span>
                     </div>
                     <Separator />
@@ -255,7 +248,7 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Avg Transaction Value</span>
                       <span className="font-semibold">
-                        ${(data?.financial.transactions.average_transaction_value || 33.33).toFixed(2)}
+                        ${data.financial.transactions.average_transaction_value.toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -269,47 +262,28 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {(
-                      data?.financial.recent_transactions || [
-                        {
-                          transaction_id: "txn_demo1",
-                          user_id: "user_demo",
-                          amount: 50.0,
-                          timestamp: new Date().toISOString(),
-                        },
-                        {
-                          transaction_id: "txn_demo2",
-                          user_id: "user_demo",
-                          amount: 75.5,
-                          timestamp: new Date().toISOString(),
-                        },
-                      ]
-                    )
-                      .slice(0, 5)
-                      .map((tx) => (
-                        <div
-                          key={tx.transaction_id}
-                          className="flex justify-between items-center py-2 border-b last:border-0"
-                        >
-                          <div>
-                            <p className="text-sm font-medium">{tx.transaction_id}</p>
-                            <p className="text-xs text-muted-foreground">{tx.user_id}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-semibold">${tx.amount.toFixed(2)}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(tx.timestamp).toLocaleTimeString()}
-                            </p>
-                          </div>
+                    {data.financial.recent_transactions.slice(0, 5).map((tx) => (
+                      <div
+                        key={tx.transaction_id}
+                        className="flex justify-between items-center py-2 border-b last:border-0"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{tx.transaction_id}</p>
+                          <p className="text-xs text-muted-foreground">{tx.user_id}</p>
                         </div>
-                      ))}
+                        <div className="text-right">
+                          <p className="text-sm font-semibold">${tx.amount.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">{new Date(tx.timestamp).toLocaleTimeString()}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Live Events Feed */}
-            {!isDemo && liveEvents.length > 0 && (
+            {liveEvents.length > 0 && (
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">

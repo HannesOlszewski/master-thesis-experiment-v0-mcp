@@ -2,19 +2,27 @@ import { auth } from "@/lib/auth"
 
 const API_BASE_URL = process.env.EXPERIMENT_API_URL || "http://localhost:8000"
 const API_KEY = process.env.EXPERIMENT_API_KEY
+const DEMO_API_KEY = process.env.EXPERIMENT_API_KEY_DEMO
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const session = await auth()
-    if (!session?.user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      })
+    const { searchParams } = new URL(request.url)
+    const isDemo = searchParams.get("demo") === "true"
+
+    if (!isDemo) {
+      const session = await auth()
+      if (!session?.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        })
+      }
     }
 
-    if (!API_KEY) {
-      console.error("[v0] EXPERIMENT_API_KEY environment variable is not set")
+    const apiKey = isDemo ? DEMO_API_KEY : API_KEY
+
+    if (!apiKey) {
+      console.error(`[v0] ${isDemo ? "EXPERIMENT_API_KEY_DEMO" : "EXPERIMENT_API_KEY"} environment variable is not set`)
       return new Response(JSON.stringify({ error: "API configuration missing" }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
@@ -23,7 +31,7 @@ export async function GET() {
 
     const response = await fetch(`${API_BASE_URL}/api/events`, {
       headers: {
-        "X-API-Key": API_KEY,
+        "X-API-Key": apiKey,
         Accept: "text/event-stream",
       },
     })
