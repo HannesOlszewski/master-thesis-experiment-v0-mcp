@@ -15,6 +15,11 @@ export async function GET(request: Request) {
     console.log("[v0] Dashboard API request - isDemo:", isDemo)
     console.log("[v0] Request URL:", request.url)
 
+    console.log("[v0] Incoming request headers:")
+    request.headers.forEach((value, key) => {
+      console.log(`[v0]   ${key}: ${value}`)
+    })
+
     if (!isDemo) {
       const session = await auth()
       if (!session?.user) {
@@ -27,10 +32,7 @@ export async function GET(request: Request) {
     const apiKey = isDemo ? DEMO_API_KEY : API_KEY
 
     console.log("[v0] Using API key (first 10 chars):", apiKey?.substring(0, 10) || "MISSING")
-    console.log("[v0] API key exists:", !!apiKey)
     console.log("[v0] API Base URL:", API_BASE_URL)
-    console.log("[v0] EXPERIMENT_API_URL env var:", process.env.EXPERIMENT_API_URL)
-    console.log("[v0] NODE_TLS_REJECT_UNAUTHORIZED:", process.env.NODE_TLS_REJECT_UNAUTHORIZED)
 
     if (!apiKey) {
       console.error(`[v0] ${isDemo ? "EXPERIMENT_API_KEY_DEMO" : "EXPERIMENT_API_KEY"} environment variable is not set`)
@@ -39,30 +41,37 @@ export async function GET(request: Request) {
 
     console.log("[v0] Fetching from external API:", `${API_BASE_URL}/api/dashboard`)
 
+    const cleanHeaders = new Headers({
+      "X-API-Key": apiKey,
+      Accept: "application/json",
+      "User-Agent": "Mozilla/5.0 (compatible)",
+    })
+
+    console.log("[v0] Outgoing request headers:")
+    cleanHeaders.forEach((value, key) => {
+      console.log(`[v0]   ${key}: ${value}`)
+    })
+
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 10000)
 
     const response = await fetch(`${API_BASE_URL}/api/dashboard`, {
-      headers: {
-        "X-API-Key": apiKey,
-        Accept: "application/json",
-      },
+      headers: cleanHeaders,
       cache: "no-store",
       signal: controller.signal,
-      // @ts-ignore - Add agent options for Node.js fetch
-      agent: false,
     }).finally(() => clearTimeout(timeoutId))
 
     console.log("[v0] External API response status:", response.status)
-    console.log("[v0] External API response headers:", Object.fromEntries(response.headers.entries()))
+    console.log("[v0] External API response headers:")
+    response.headers.forEach((value, key) => {
+      console.log(`[v0]   ${key}: ${value}`)
+    })
 
     const responseText = await response.text()
     console.log("[v0] External API raw response body:", responseText)
-    console.log("[v0] External API response body length:", responseText.length)
 
     if (!response.ok) {
       console.error(`[v0] External API error: ${response.status} ${response.statusText}`)
-      console.error(`[v0] External API error body:`, responseText)
       return NextResponse.json({ error: "External API error" }, { status: 500 })
     }
 
@@ -70,7 +79,6 @@ export async function GET(request: Request) {
     try {
       data = JSON.parse(responseText)
       console.log("[v0] Dashboard API data parsed successfully")
-      console.log("[v0] Data keys:", Object.keys(data))
     } catch (parseError) {
       console.error("[v0] Failed to parse API response as JSON")
       console.error("[v0] Parse error:", parseError)
@@ -83,9 +91,6 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("[v0] ========================================")
     console.error("[v0] Dashboard API error:", error)
-    console.error("[v0] Error type:", error instanceof Error ? error.constructor.name : typeof error)
-    console.error("[v0] Error details:", error instanceof Error ? error.message : String(error))
-    console.error("[v0] Error stack:", error instanceof Error ? error.stack : "No stack trace")
     console.error("[v0] ========================================")
 
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
