@@ -29,6 +29,8 @@ export async function GET(request: Request) {
     console.log("[v0] Using API key (first 10 chars):", apiKey?.substring(0, 10) || "MISSING")
     console.log("[v0] API key exists:", !!apiKey)
     console.log("[v0] API Base URL:", API_BASE_URL)
+    console.log("[v0] EXPERIMENT_API_URL env var:", process.env.EXPERIMENT_API_URL)
+    console.log("[v0] NODE_TLS_REJECT_UNAUTHORIZED:", process.env.NODE_TLS_REJECT_UNAUTHORIZED)
 
     if (!apiKey) {
       console.error(`[v0] ${isDemo ? "EXPERIMENT_API_KEY_DEMO" : "EXPERIMENT_API_KEY"} environment variable is not set`)
@@ -43,9 +45,12 @@ export async function GET(request: Request) {
     const response = await fetch(`${API_BASE_URL}/api/dashboard`, {
       headers: {
         "X-API-Key": apiKey,
+        Accept: "application/json",
       },
       cache: "no-store",
       signal: controller.signal,
+      // @ts-ignore - Add agent options for Node.js fetch
+      agent: false,
     }).finally(() => clearTimeout(timeoutId))
 
     console.log("[v0] External API response status:", response.status)
