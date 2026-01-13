@@ -18,7 +18,19 @@ interface DashboardContentProps {
   isDemo?: boolean
 }
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = async (url: string) => {
+  console.log("[v0] Fetching dashboard data from:", url)
+  const response = await fetch(url)
+  const json = await response.json()
+
+  if (!response.ok) {
+    console.error("[v0] Dashboard API error:", json)
+    throw new Error(json.error || "Failed to fetch dashboard data")
+  }
+
+  console.log("[v0] Dashboard data loaded successfully")
+  return json
+}
 
 export function DashboardContent({ user, isDemo = false }: DashboardContentProps) {
   const router = useRouter()
@@ -30,6 +42,10 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
     {
       refreshInterval: 30000, // Refresh every 30 seconds
       revalidateOnFocus: true,
+      onError: (err) => {
+        console.error("[v0] SWR error:", err)
+      },
+      shouldRetryOnError: false, // Don't auto-retry on error to avoid spam
     },
   )
 
@@ -101,12 +117,14 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
           <Alert className="bg-red-50 border-red-200">
             <AlertCircle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800">
-              <strong>Error:</strong> Failed to load dashboard data. Please check your API configuration.
+              <strong>Error:</strong>{" "}
+              {error.message ||
+                "Failed to load dashboard data. Please check your API configuration and ensure environment variables are set correctly."}
             </AlertDescription>
           </Alert>
         )}
 
-        {data && (
+        {data && !error && (
           <>
             {/* User Statistics Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
