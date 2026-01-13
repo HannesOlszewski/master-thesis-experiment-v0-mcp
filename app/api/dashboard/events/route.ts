@@ -27,8 +27,9 @@ export async function GET(request: Request) {
 
     const apiKey = isDemo ? DEMO_API_KEY : API_KEY
 
-    console.log("[v0] Using API key:", isDemo ? "DEMO_API_KEY" : "EXPERIMENT_API_KEY")
+    console.log("[v0] Using API key variable:", isDemo ? "DEMO_API_KEY" : "EXPERIMENT_API_KEY")
     console.log("[v0] API key exists:", !!apiKey)
+    console.log("[v0] API key preview:", apiKey ? `${apiKey.substring(0, 8)}...` : "NOT SET")
     console.log("[v0] API Base URL:", API_BASE_URL)
 
     if (!apiKey) {
@@ -41,6 +42,7 @@ export async function GET(request: Request) {
     }
 
     console.log("[v0] Connecting to external SSE:", `${API_BASE_URL}/api/events`)
+    console.log("[v0] Request headers:", { "X-API-Key": `${apiKey.substring(0, 8)}...`, Accept: "text/event-stream" })
 
     const response = await fetch(`${API_BASE_URL}/api/events`, {
       headers: {
@@ -50,9 +52,12 @@ export async function GET(request: Request) {
     })
 
     console.log("[v0] External API SSE response status:", response.status)
+    console.log("[v0] External API SSE response headers:", Object.fromEntries(response.headers.entries()))
 
     if (!response.ok) {
+      const errorText = await response.text()
       console.error(`[v0] External API SSE error: ${response.status}`)
+      console.error(`[v0] External API SSE error body:`, errorText)
       console.log("[v0] ========================================")
       return new Response(JSON.stringify({ error: "Failed to connect to event stream" }), {
         status: response.status,
