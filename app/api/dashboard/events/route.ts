@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 
-const API_BASE_URL = process.env.EXPERIMENT_API_URL || "http://localhost:8000"
+const API_BASE_URL = process.env.EXPERIMENT_API_URL || "https://localhost:8000"
 const API_KEY = process.env.EXPERIMENT_API_KEY
 const DEMO_API_KEY = process.env.EXPERIMENT_API_KEY_DEMO
 
@@ -27,9 +27,8 @@ export async function GET(request: Request) {
 
     const apiKey = isDemo ? DEMO_API_KEY : API_KEY
 
-    console.log("[v0] Using API key variable:", isDemo ? "DEMO_API_KEY" : "EXPERIMENT_API_KEY")
+    console.log("[v0] Using API key (first 10 chars):", apiKey?.substring(0, 10) || "MISSING")
     console.log("[v0] API key exists:", !!apiKey)
-    console.log("[v0] API key preview:", apiKey ? `${apiKey.substring(0, 8)}...` : "NOT SET")
     console.log("[v0] API Base URL:", API_BASE_URL)
 
     if (!apiKey) {
@@ -42,7 +41,6 @@ export async function GET(request: Request) {
     }
 
     console.log("[v0] Connecting to external SSE:", `${API_BASE_URL}/api/events`)
-    console.log("[v0] Request headers:", { "X-API-Key": `${apiKey.substring(0, 8)}...`, Accept: "text/event-stream" })
 
     const response = await fetch(`${API_BASE_URL}/api/events`, {
       headers: {

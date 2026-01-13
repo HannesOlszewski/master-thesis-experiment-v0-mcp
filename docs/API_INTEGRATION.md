@@ -49,10 +49,12 @@ Configure these variables in your deployment:
 
 ```bash
 # External API Configuration
-EXPERIMENT_API_URL=https://api-domain.com      # Base URL of the external API
+EXPERIMENT_API_URL=https://api-domain.com      # Base URL of the external API (MUST use HTTPS)
 EXPERIMENT_API_KEY=your-api-key-here           # API key for authenticated users
 EXPERIMENT_API_KEY_DEMO=your-demo-api-key-here # API key for demo mode users
 ```
+
+**Important:** The `EXPERIMENT_API_URL` must use HTTPS. The external API will reject HTTP connections with "Invalid request, only https is supported".
 
 ## API Endpoints
 
@@ -109,6 +111,10 @@ When deploying to Vercel:
 
 ## Troubleshooting
 
+**"Invalid request, only https is supported" error:**
+- Ensure `EXPERIMENT_API_URL` uses `https://` not `http://`
+- The external API requires secure connections
+
 **No data showing in demo mode:**
 - Check `EXPERIMENT_API_KEY_DEMO` is set
 - Verify API URL is accessible
@@ -123,4 +129,3 @@ When deploying to Vercel:
 - Ensure `/api/dashboard/events` is accessible
 - Check browser console for connection errors
 - Verify API supports SSE endpoint with your API key
-</md>
