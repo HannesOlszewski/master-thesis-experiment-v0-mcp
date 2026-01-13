@@ -3,12 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AlertCircle } from "lucide-react"
 import Link from "next/link"
 
-export default function AuthErrorPage({
+export default async function AuthErrorPage({
   searchParams,
 }: {
-  searchParams: { error?: string }
+  searchParams: Promise<{ error?: string }>
 }) {
-  const error = searchParams.error
+  const error = (await searchParams).error
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5E6D3] to-[#D4E5D4] p-4">
