@@ -36,13 +36,13 @@ A modern, fully responsive landing page for a digital agency specializing in web
 ### Installation
 
 1. Clone the repository:
-```bash
+\`\`\`bash
 git clone <repository-url>
 cd a-startup-landing-page
-```
+\`\`\`
 
 2. Install dependencies:
-```bash
+\`\`\`bash
 npm install
 # or
 pnpm install
@@ -50,24 +50,24 @@ pnpm install
 yarn install
 # or
 bun install
-```
+\`\`\`
 
 3. Set up environment variables (optional for OAuth):
-```bash
+\`\`\`bash
 cp .env.example .env.local
-```
+\`\`\`
 
 Edit `.env.local` with your Keycloak configuration:
-```env
+\`\`\`env
 NEXTAUTH_SECRET=your-secret-here
 KEYCLOAK_CLIENT_ID=your-client-id
 KEYCLOAK_CLIENT_SECRET=your-client-secret
 KEYCLOAK_ISSUER=https://your-keycloak-domain/realms/your-realm
 NEXTAUTH_URL=http://localhost:3000
-```
+\`\`\`
 
 4. Run the development server:
-```bash
+\`\`\`bash
 npm run dev
 # or
 pnpm dev
@@ -75,7 +75,7 @@ pnpm dev
 yarn dev
 # or
 bun dev
-```
+\`\`\`
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
@@ -121,7 +121,7 @@ For production deployment with real authentication:
 
 ## Project Structure
 
-```
+\`\`\`
 .
 ├── app/                      # Next.js app directory
 │   ├── layout.tsx           # Root layout with SessionProvider
@@ -173,7 +173,7 @@ For production deployment with real authentication:
 ├── vitest.config.ts         # Vitest configuration
 ├── playwright.config.ts     # Playwright configuration
 └── README.md
-```
+\`\`\`
 
 ## Testing
 
@@ -181,15 +181,15 @@ For production deployment with real authentication:
 
 Run unit and integration tests with Vitest:
 
-```bash
+\`\`\`bash
 npm run test
-```
+\`\`\`
 
 View test coverage:
 
-```bash
+\`\`\`bash
 npm run test:coverage
-```
+\`\`\`
 
 The project maintains 80%+ code coverage across:
 - Unit tests for all components
@@ -200,9 +200,9 @@ The project maintains 80%+ code coverage across:
 
 Run e2e tests with Playwright:
 
-```bash
+\`\`\`bash
 npm run test:e2e
-```
+\`\`\`
 
 E2E tests cover:
 - Full user journeys
@@ -245,15 +245,15 @@ All textual content is centralized in component files for easy updates:
 
 Build the project:
 
-```bash
+\`\`\`bash
 npm run build
-```
+\`\`\`
 
 The output will be in the `.next` directory. Serve it with:
 
-```bash
+\`\`\`bash
 npm run start
-```
+\`\`\`
 
 ## CI/CD
 

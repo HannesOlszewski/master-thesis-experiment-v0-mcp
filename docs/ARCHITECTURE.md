@@ -25,14 +25,14 @@ This document describes the architecture and design decisions for the A Startup 
 
 ### Component Structure
 
-```
+\`\`\`
 components/
 ├── ui/              # Reusable UI primitives (buttons, cards, etc.)
 ├── sections/        # Page section components
 ├── header.tsx       # Global header
 ├── footer.tsx       # Global footer
 └── subpage-layout.tsx  # Shared layout for legal pages
-```
+\`\`\`
 
 ### Component Patterns
 

@@ -11,9 +11,9 @@ This is a required secret key used to encrypt JWT tokens and secure your authent
 **How to generate:**
 
 Run this command in your terminal:
-```bash
+\`\`\`bash
 openssl rand -base64 32
-```
+\`\`\`
 
 Or use this online generator: https://generate-secret.vercel.app/32
 

@@ -38,16 +38,16 @@ This application uses NextAuth.js v5 with Keycloak as the OAuth2 provider for au
 Add the following URIs (adjust for your domains):
 
 **Development:**
-```
+\`\`\`
 http://localhost:3000/api/auth/callback/keycloak
 http://localhost:3000/*
-```
+\`\`\`
 
 **Production:**
-```
+\`\`\`
 https://your-domain.com/api/auth/callback/keycloak
 https://your-domain.com/*
-```
+\`\`\`
 
 5. **Web origins**: Add `+` or your specific domains
 6. Click **Save**
@@ -70,7 +70,7 @@ If you want additional user information:
 
 Create a `.env.local` file in your project root:
 
-```env
+\`\`\`env
 # Keycloak Configuration
 KEYCLOAK_CLIENT_ID=your-client-id
 KEYCLOAK_CLIENT_SECRET=your-client-secret
@@ -79,15 +79,15 @@ KEYCLOAK_ISSUER=https://your-keycloak-domain/realms/your-realm-name
 # NextAuth Configuration
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=generate-with-openssl-rand-base64-32
-```
+\`\`\`
 
 ### Generate NEXTAUTH_SECRET
 
 Run this command in your terminal:
 
-```bash
+\`\`\`bash
 openssl rand -base64 32
-```
+\`\`\`
 
 ## Application Structure
 
@@ -114,9 +114,9 @@ The following routes require authentication:
 ## Testing Authentication
 
 1. Start your development server:
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 2. Navigate to `http://localhost:3000`
 
@@ -159,7 +159,7 @@ Use the middleware to automatically protect routes. Pages under `/dashboard` and
 
 ### Getting the Session (Server Component)
 
-```tsx
+\`\`\`tsx
 import { auth } from "@/auth"
 
 export default async function Page() {
@@ -171,11 +171,11 @@ export default async function Page() {
   
   return <div>Hello {session.user.name}</div>
 }
-```
+\`\`\`
 
 ### Getting the Session (Client Component)
 
-```tsx
+\`\`\`tsx
 "use client"
 import { useSession } from "next-auth/react"
 
@@ -192,15 +192,15 @@ export function Component() {
   
   return <div>Hello {session.user.name}</div>
 }
-```
+\`\`\`
 
 ### Sign Out
 
-```tsx
+\`\`\`tsx
 import { signOut } from "next-auth/react"
 
 await signOut({ callbackUrl: "/" })
-```
+\`\`\`
 
 ## Troubleshooting
 

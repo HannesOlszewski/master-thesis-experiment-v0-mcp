@@ -20,13 +20,13 @@ This guide explains how to update content on the A Startup landing page.
 
 **File:** `components/sections/hero-section.tsx`
 
-```tsx
+\`\`\`tsx
 // Update the main headline
 <h1>Transform Your Digital Presence</h1>
 
 // Update the subtitle
 <p>We help businesses create stunning web experiences...</p>
-```
+\`\`\`
 
 ### Features Section
 
@@ -34,7 +34,7 @@ This guide explains how to update content on the A Startup landing page.
 
 Add or modify features in the `features` array:
 
-```tsx
+\`\`\`tsx
 const features = [
   {
     icon: Code,  // Choose from lucide-react icons
@@ -43,7 +43,7 @@ const features = [
   },
   // Add more features here
 ]
-```
+\`\`\`
 
 ### About Section
 
@@ -51,13 +51,13 @@ const features = [
 
 Update company highlights:
 
-```tsx
+\`\`\`tsx
 const highlights = [
   "10+ years of combined experience",
   "100+ successful projects delivered",
   // Add more highlights
 ]
-```
+\`\`\`
 
 ### Testimonials
 
@@ -65,7 +65,7 @@ const highlights = [
 
 Add or modify testimonials:
 
-```tsx
+\`\`\`tsx
 const testimonials = [
   {
     name: "Sarah Johnson",
@@ -75,7 +75,7 @@ const testimonials = [
   },
   // Add more testimonials
 ]
-```
+\`\`\`
 
 ### Contact Information
 
@@ -83,7 +83,7 @@ const testimonials = [
 
 Update contact methods:
 
-```tsx
+\`\`\`tsx
 const contactMethods = [
   {
     icon: Mail,
@@ -93,7 +93,7 @@ const contactMethods = [
   },
   // Update phone, address, etc.
 ]
-```
+\`\`\`
 
 ## Adding Images
 
@@ -120,12 +120,12 @@ Update legal content in:
 
 Update the metadata object:
 
-```tsx
+\`\`\`tsx
 export const metadata: Metadata = {
   title: "A Startup - Transform Your Digital Presence",
   description: "We help businesses create stunning web experiences...",
 }
-```
+\`\`\`
 
 For individual pages, update the metadata export in each page file.
 
@@ -135,13 +135,13 @@ For individual pages, update the metadata export in each page file.
 
 Modify CSS variables in the `:root` section to change colors:
 
-```css
+\`\`\`css
 :root {
   --primary: oklch(0.6768 0.0719 170.61);  /* Main brand color */
   --secondary: oklch(0.4596 0.0406 345.27);  /* Accent color */
   /* ... */
 }
-```
+\`\`\`
 
 ## Social Media Links
 
@@ -149,13 +149,13 @@ Modify CSS variables in the `:root` section to change colors:
 
 Update social media URLs:
 
-```tsx
+\`\`\`tsx
 const socialLinks = [
   { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
   { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
   // Update URLs here
 ]
-```
+\`\`\`
 
 ## Adding New Sections
 
@@ -166,7 +166,7 @@ const socialLinks = [
 
 Example:
 
-```tsx
+\`\`\`tsx
 // components/sections/my-section.tsx
 export function MySection() {
   return (
@@ -187,7 +187,7 @@ export default function HomePage() {
     </>
   )
 }
-```
+\`\`\`
 
 ## Content Best Practices
 
@@ -201,11 +201,11 @@ export default function HomePage() {
 
 After updating content, run:
 
-```bash
+\`\`\`bash
 npm run test        # Run unit tests
 npm run build       # Verify build
 npm run dev         # Test locally
-```
+\`\`\`
 
 ## Need Help?
 

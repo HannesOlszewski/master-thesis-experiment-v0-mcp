@@ -15,3 +15,5 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     </NextAuthSessionProvider>
   )
 }
+
+export { SessionProvider as Providers }

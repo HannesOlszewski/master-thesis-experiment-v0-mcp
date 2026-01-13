@@ -33,34 +33,34 @@ Thank you for considering contributing to the A Startup landing page project!
 
 Follow conventional commits:
 
-```
+\`\`\`
 feat: add new testimonial section
 fix: resolve mobile menu bug
 docs: update README installation steps
 test: add header component tests
-```
+\`\`\`
 
 ### Before Submitting a PR
 
 1. **Run all tests:**
-   ```bash
+   \`\`\`bash
    npm run test:all
-   ```
+   \`\`\`
 
 2. **Check linting:**
-   ```bash
+   \`\`\`bash
    npm run lint
-   ```
+   \`\`\`
 
 3. **Verify build:**
-   ```bash
+   \`\`\`bash
    npm run build
-   ```
+   \`\`\`
 
 4. **Test locally:**
-   ```bash
+   \`\`\`bash
    npm run start
-   ```
+   \`\`\`
 
 ## Code Standards
 

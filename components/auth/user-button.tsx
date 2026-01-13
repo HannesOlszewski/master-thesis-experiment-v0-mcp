@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogOut, User, LayoutDashboard } from "lucide-react"
+import { LogOut, LayoutDashboard } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import type { User as NextAuthUser } from "next-auth"
@@ -28,6 +28,16 @@ export function UserButton({ user }: UserButtonProps) {
       .map((n) => n[0])
       .join("")
       .toUpperCase() || "U"
+
+  const handleLogout = () => {
+    // Check if this is a demo user
+    if (typeof window !== "undefined" && localStorage.getItem("demo_user")) {
+      localStorage.removeItem("demo_user")
+      window.location.href = "/"
+    } else {
+      signOut({ callbackUrl: "/" })
+    }
+  }
 
   return (
     <DropdownMenu>
@@ -51,14 +61,10 @@ export function UserButton({ user }: UserButtonProps) {
           <LayoutDashboard className="mr-2 h-4 w-4" />
           Dashboard
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push("/profile")}>
-          <User className="mr-2 h-4 w-4" />
-          Profile
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
+          Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
