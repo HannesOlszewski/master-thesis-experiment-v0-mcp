@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 
-const API_BASE_URL = process.env.EXPERIMENT_API_URL || "https://localhost:8000"
+const API_BASE_URL = process.env.EXPERIMENT_API_URL || "http://localhost:8000"
 const API_KEY = process.env.EXPERIMENT_API_KEY
 const DEMO_API_KEY = process.env.EXPERIMENT_API_KEY_DEMO
 

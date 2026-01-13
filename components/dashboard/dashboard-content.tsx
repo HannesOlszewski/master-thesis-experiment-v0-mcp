@@ -54,35 +54,33 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
   console.log("[v0] Dashboard state - isLoading:", isLoading, "hasData:", !!data, "hasError:", !!error)
 
   useEffect(() => {
-    console.log("[v0] Setting up EventSource connection")
-    let eventSource: EventSource | null = null
+    const eventsUrl = isDemo ? "/api/dashboard/events?demo=true" : "/api/dashboard/events"
+    console.log("[v0] Connecting to EventSource:", eventsUrl)
 
-    try {
-      eventSource = new EventSource(isDemo ? "/api/dashboard/events?demo=true" : "/api/dashboard/events")
+    const eventSource = new EventSource(eventsUrl)
 
-      eventSource.addEventListener("dashboard_update", (e) => {
-        console.log("[v0] Received dashboard_update event")
-        const eventData: DashboardEvent = { event: "dashboard_update", data: JSON.parse(e.data) }
-        setLiveEvents((prev) => [eventData, ...prev.slice(0, 9)])
-      })
+    eventSource.onopen = () => {
+      console.log("[v0] EventSource connection opened")
+    }
 
-      eventSource.addEventListener("system_status", (e) => {
-        console.log("[v0] Received system_status event")
-        const eventData: DashboardEvent = { event: "system_status", data: JSON.parse(e.data) }
-        setLiveEvents((prev) => [eventData, ...prev.slice(0, 9)])
-      })
-
-      eventSource.onerror = (error) => {
-        console.error("[v0] SSE connection error:", error)
-        eventSource?.close()
+    eventSource.onmessage = (event) => {
+      try {
+        console.log("[v0] EventSource message received:", event.data)
+        const eventData = JSON.parse(event.data)
+        setLiveEvents((prev) => [{ event: event.type || "message", data: eventData }, ...prev.slice(0, 19)])
+      } catch (err) {
+        console.error("[v0] Failed to parse event data:", err)
       }
-    } catch (error) {
-      console.error("[v0] Failed to create EventSource:", error)
+    }
+
+    eventSource.onerror = (error) => {
+      console.error("[v0] EventSource error:", error)
+      eventSource.close()
     }
 
     return () => {
-      console.log("[v0] Cleaning up EventSource")
-      eventSource?.close()
+      console.log("[v0] Closing EventSource connection")
+      eventSource.close()
     }
   }, [isDemo])
 
@@ -331,8 +329,10 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
                         <span className="font-medium">{event.event}:</span>{" "}
                         {event.data.metric && `${event.data.metric} = ${event.data.value}`}
                         {event.data.status && `Status: ${event.data.status}`}
+                        {event.data.transaction_id && `Transaction: ${event.data.transaction_id}`}
+                        {event.data.amount && ` $${event.data.amount}`}
                         <span className="text-xs text-muted-foreground ml-2">
-                          {new Date(event.data.timestamp).toLocaleTimeString()}
+                          {event.data.timestamp && new Date(event.data.timestamp).toLocaleTimeString()}
                         </span>
                       </div>
                     ))}
