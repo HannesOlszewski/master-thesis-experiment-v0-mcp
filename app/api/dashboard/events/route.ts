@@ -9,25 +9,38 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const isDemo = searchParams.get("demo") === "true"
 
+    console.log("[v0] ========================================")
+    console.log("[v0] Dashboard Events API GET request started")
+    console.log("[v0] Events API request - isDemo:", isDemo)
+
     if (!isDemo) {
       const session = await auth()
       if (!session?.user) {
+        console.log("[v0] Events API - No session found")
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
           headers: { "Content-Type": "application/json" },
         })
       }
+      console.log("[v0] Events API - Session found for user:", session.user.email)
     }
 
     const apiKey = isDemo ? DEMO_API_KEY : API_KEY
 
+    console.log("[v0] Using API key:", isDemo ? "DEMO_API_KEY" : "EXPERIMENT_API_KEY")
+    console.log("[v0] API key exists:", !!apiKey)
+    console.log("[v0] API Base URL:", API_BASE_URL)
+
     if (!apiKey) {
       console.error(`[v0] ${isDemo ? "EXPERIMENT_API_KEY_DEMO" : "EXPERIMENT_API_KEY"} environment variable is not set`)
+      console.log("[v0] ========================================")
       return new Response(JSON.stringify({ error: "API configuration missing" }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
       })
     }
+
+    console.log("[v0] Connecting to external SSE:", `${API_BASE_URL}/api/events`)
 
     const response = await fetch(`${API_BASE_URL}/api/events`, {
       headers: {
@@ -36,13 +49,19 @@ export async function GET(request: Request) {
       },
     })
 
+    console.log("[v0] External API SSE response status:", response.status)
+
     if (!response.ok) {
       console.error(`[v0] External API SSE error: ${response.status}`)
+      console.log("[v0] ========================================")
       return new Response(JSON.stringify({ error: "Failed to connect to event stream" }), {
         status: response.status,
         headers: { "Content-Type": "application/json" },
       })
     }
+
+    console.log("[v0] SSE connection established successfully")
+    console.log("[v0] ========================================")
 
     return new Response(response.body, {
       headers: {
@@ -52,7 +71,10 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
+    console.error("[v0] ========================================")
     console.error("[v0] Dashboard events API error:", error)
+    console.error("[v0] Error details:", error instanceof Error ? error.message : String(error))
+    console.error("[v0] ========================================")
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

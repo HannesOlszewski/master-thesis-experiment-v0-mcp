@@ -36,6 +36,8 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
   const router = useRouter()
   const [liveEvents, setLiveEvents] = useState<DashboardEvent[]>([])
 
+  console.log("[v0] DashboardContent mounted - isDemo:", isDemo, "user:", user.email)
+
   const { data, error, isLoading } = useSWR<DashboardData>(
     isDemo ? "/api/dashboard?demo=true" : "/api/dashboard",
     fetcher,
@@ -49,26 +51,38 @@ export function DashboardContent({ user, isDemo = false }: DashboardContentProps
     },
   )
 
+  console.log("[v0] Dashboard state - isLoading:", isLoading, "hasData:", !!data, "hasError:", !!error)
+
   useEffect(() => {
-    const eventSource = new EventSource(isDemo ? "/api/dashboard/events?demo=true" : "/api/dashboard/events")
+    console.log("[v0] Setting up EventSource connection")
+    let eventSource: EventSource | null = null
 
-    eventSource.addEventListener("dashboard_update", (e) => {
-      const eventData: DashboardEvent = { event: "dashboard_update", data: JSON.parse(e.data) }
-      setLiveEvents((prev) => [eventData, ...prev.slice(0, 9)])
-    })
+    try {
+      eventSource = new EventSource(isDemo ? "/api/dashboard/events?demo=true" : "/api/dashboard/events")
 
-    eventSource.addEventListener("system_status", (e) => {
-      const eventData: DashboardEvent = { event: "system_status", data: JSON.parse(e.data) }
-      setLiveEvents((prev) => [eventData, ...prev.slice(0, 9)])
-    })
+      eventSource.addEventListener("dashboard_update", (e) => {
+        console.log("[v0] Received dashboard_update event")
+        const eventData: DashboardEvent = { event: "dashboard_update", data: JSON.parse(e.data) }
+        setLiveEvents((prev) => [eventData, ...prev.slice(0, 9)])
+      })
 
-    eventSource.onerror = () => {
-      console.error("[v0] SSE connection error")
-      eventSource.close()
+      eventSource.addEventListener("system_status", (e) => {
+        console.log("[v0] Received system_status event")
+        const eventData: DashboardEvent = { event: "system_status", data: JSON.parse(e.data) }
+        setLiveEvents((prev) => [eventData, ...prev.slice(0, 9)])
+      })
+
+      eventSource.onerror = (error) => {
+        console.error("[v0] SSE connection error:", error)
+        eventSource?.close()
+      }
+    } catch (error) {
+      console.error("[v0] Failed to create EventSource:", error)
     }
 
     return () => {
-      eventSource.close()
+      console.log("[v0] Cleaning up EventSource")
+      eventSource?.close()
     }
   }, [isDemo])
 
