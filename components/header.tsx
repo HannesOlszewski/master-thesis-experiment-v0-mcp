@@ -20,6 +20,23 @@ export function Header() {
   const [activeSection, setActiveSection] = useState("hero")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { data: session, status } = useSession()
+  const [demoUser, setDemoUser] = useState<any>(null)
+
+  useEffect(() => {
+    const checkDemoUser = () => {
+      if (typeof window !== "undefined") {
+        const demoUserData = localStorage.getItem("demo_user")
+        if (demoUserData) {
+          setDemoUser(JSON.parse(demoUserData))
+        }
+      }
+    }
+    checkDemoUser()
+
+    // Listen for storage changes
+    window.addEventListener("storage", checkDemoUser)
+    return () => window.removeEventListener("storage", checkDemoUser)
+  }, [])
 
   useEffect(() => {
     const observerOptions = {
@@ -61,6 +78,9 @@ export function Header() {
     setMobileMenuOpen(false)
   }
 
+  const isAuthenticated = status === "authenticated" || demoUser
+  const currentUser = session?.user || demoUser
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -84,8 +104,8 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-          {status === "authenticated" && session?.user ? (
-            <UserButton user={session.user} />
+          {isAuthenticated && currentUser ? (
+            <UserButton user={currentUser} />
           ) : (
             <>
               <Button asChild variant="ghost" className="hidden md:flex">
@@ -123,7 +143,7 @@ export function Header() {
                 {label}
               </button>
             ))}
-            {status === "authenticated" && session?.user ? (
+            {isAuthenticated && currentUser ? (
               <Button asChild className="w-full bg-transparent" variant="outline">
                 <Link href="/dashboard">Dashboard</Link>
               </Button>

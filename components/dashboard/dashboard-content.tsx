@@ -3,17 +3,27 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, User, Mail } from "lucide-react"
+import { LogOut, User, Mail, AlertCircle } from "lucide-react"
 import { signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import type { User as NextAuthUser } from "next-auth"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface DashboardContentProps {
   user: NextAuthUser
+  isDemo?: boolean
 }
 
-export function DashboardContent({ user }: DashboardContentProps) {
+export function DashboardContent({ user, isDemo = false }: DashboardContentProps) {
+  const router = useRouter()
+
   const handleLogout = async () => {
-    await signOut({ callbackUrl: "/" })
+    if (isDemo) {
+      localStorage.removeItem("demo_user")
+      router.push("/")
+    } else {
+      await signOut({ callbackUrl: "/" })
+    }
   }
 
   const initials =
@@ -34,10 +44,20 @@ export function DashboardContent({ user }: DashboardContentProps) {
           </Button>
         </div>
 
+        {isDemo && (
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertCircle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <strong>Demo Mode:</strong> You're viewing a demo of the dashboard. Deploy to Vercel to enable full OAuth
+              authentication with Keycloak.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Profile Information</CardTitle>
-            <CardDescription>Your authenticated user details</CardDescription>
+            <CardDescription>Your {isDemo ? "demo" : "authenticated"} user details</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center gap-4">
@@ -73,7 +93,11 @@ export function DashboardContent({ user }: DashboardContentProps) {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Welcome to Your Dashboard</CardTitle>
-            <CardDescription>You have successfully authenticated with Keycloak</CardDescription>
+            <CardDescription>
+              {isDemo
+                ? "This is a demo showing how the dashboard works"
+                : "You have successfully authenticated with Keycloak"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">

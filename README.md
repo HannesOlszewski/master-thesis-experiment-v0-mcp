@@ -1,12 +1,13 @@
 # A Startup - Digital Agency Landing Page
 
-A modern, fully responsive landing page for a digital agency specializing in web and software development. Built with Next.js 16, React 19, TypeScript, and Tailwind CSS.
+A modern, fully responsive landing page for a digital agency specializing in web and software development. Built with Next.js 16, React 19, TypeScript, and Tailwind CSS with OAuth2 authentication via Keycloak.
 
 ## Features
 
 - 🎨 Modern, accessible design with WCAG 2.2 AA compliance
 - 📱 Fully responsive across mobile, tablet, and desktop
 - ⚡ Optimized performance with Next.js 16
+- 🔐 OAuth2 authentication with Keycloak (NextAuth.js v5)
 - 🧪 Comprehensive test coverage (80%+)
 - 🔒 Security-focused implementation
 - 🍪 Cookie consent management
@@ -19,6 +20,7 @@ A modern, fully responsive landing page for a digital agency specializing in web
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS v4
 - **UI Components:** shadcn/ui with Radix UI primitives
+- **Authentication:** NextAuth.js v5 with Keycloak provider
 - **Icons:** Lucide React
 - **Testing:** Vitest + Playwright
 - **CI/CD:** GitHub Actions
@@ -29,6 +31,7 @@ A modern, fully responsive landing page for a digital agency specializing in web
 
 - Node.js 18+ or Bun
 - npm, pnpm, yarn, or bun
+- (Optional) Keycloak instance for OAuth2 authentication
 
 ### Installation
 
@@ -49,7 +52,21 @@ yarn install
 bun install
 ```
 
-3. Run the development server:
+3. Set up environment variables (optional for OAuth):
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` with your Keycloak configuration:
+```env
+NEXTAUTH_SECRET=your-secret-here
+KEYCLOAK_CLIENT_ID=your-client-id
+KEYCLOAK_CLIENT_SECRET=your-client-secret
+KEYCLOAK_ISSUER=https://your-keycloak-domain/realms/your-realm
+NEXTAUTH_URL=http://localhost:3000
+```
+
+4. Run the development server:
 ```bash
 npm run dev
 # or
@@ -60,7 +77,34 @@ yarn dev
 bun dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Authentication
+
+### Demo Mode (v0 Preview)
+
+The application includes a **Demo Mode** that works in the v0 preview environment without requiring OAuth setup:
+
+- Click "Continue in Demo Mode" on the login page
+- Access dashboard and profile pages with a simulated user
+- Perfect for testing the UI and user flows
+
+### OAuth2 with Keycloak (Production)
+
+For production deployment with real authentication:
+
+1. Set up a Keycloak instance
+2. Configure a client in Keycloak with valid redirect URIs
+3. Add environment variables to your deployment (Vercel, etc.)
+4. See `docs/AUTH_SETUP.md` for detailed configuration instructions
+
+**Note:** External OAuth2 authentication requires stable redirect URLs and won't work fully in the v0 preview environment due to dynamic preview URLs. Deploy to Vercel or another hosting platform for full OAuth functionality.
+
+### Protected Routes
+
+- `/dashboard` - User dashboard (requires authentication or demo mode)
+- `/profile` - User profile page (requires authentication or demo mode)
+- `/login` - Login page with OAuth and demo mode options
 
 ## Available Scripts
 
@@ -80,17 +124,32 @@ bun dev
 ```
 .
 ├── app/                      # Next.js app directory
-│   ├── layout.tsx           # Root layout
+│   ├── layout.tsx           # Root layout with SessionProvider
 │   ├── page.tsx             # Landing page
+│   ├── login/               # Login page
+│   ├── dashboard/           # Protected dashboard page
+│   ├── profile/             # Protected profile page
+│   ├── auth/                # Auth error pages
+│   ├── api/
+│   │   ├── auth/[...nextauth]/ # NextAuth API routes
+│   │   └── config-check/    # Config validation endpoint
 │   ├── privacy/             # Privacy policy page
 │   ├── terms/               # Terms of service page
 │   ├── imprint/             # Imprint page
 │   └── cookie-policy/       # Cookie policy page
 ├── components/              # React components
-│   ├── header.tsx           # Sticky header with navigation
+│   ├── header.tsx           # Sticky header with auth state
 │   ├── footer.tsx           # Footer with links
 │   ├── cookie-consent-banner.tsx
 │   ├── subpage-layout.tsx   # Layout for legal pages
+│   ├── auth/                # Authentication components
+│   │   ├── login-form.tsx   # Login form with OAuth & demo mode
+│   │   ├── session-provider.tsx # NextAuth session provider
+│   │   └── user-button.tsx  # User menu dropdown
+│   ├── dashboard/           # Dashboard components
+│   │   └── dashboard-content.tsx
+│   ├── profile/             # Profile components
+│   │   └── profile-content.tsx
 │   ├── sections/            # Landing page sections
 │   │   ├── hero-section.tsx
 │   │   ├── features-section.tsx
@@ -99,11 +158,18 @@ bun dev
 │   │   └── contact-section.tsx
 │   ├── ui/                  # shadcn/ui components
 │   └── __tests__/           # Component tests
+├── lib/                     # Utility functions
+│   └── auth.ts              # NextAuth configuration
+├── docs/                    # Documentation
+│   ├── AUTH_SETUP.md        # Keycloak setup guide
+│   ├── ARCHITECTURE.md      # Technical architecture
+│   ├── CONTENT_GUIDE.md     # Content management
+│   └── ENVIRONMENT_SETUP.md # Environment configuration
 ├── e2e/                     # End-to-end tests
 ├── hooks/                   # Custom React hooks
-├── lib/                     # Utility functions
 ├── public/                  # Static assets
 │   └── images/              # Images (logo, hero, about)
+├── proxy.ts                 # Next.js 16 middleware (replaces middleware.ts)
 ├── vitest.config.ts         # Vitest configuration
 ├── playwright.config.ts     # Playwright configuration
 └── README.md
@@ -202,19 +268,29 @@ See `.github/workflows/` for configuration details.
 
 ## Security
 
+- OAuth2 authentication with Keycloak
+- JWT-based session management
+- Secure HTTP-only cookies
 - No sensitive data in client-side code
 - Secure headers configured
-- No cookies used (localStorage for consent only)
+- CSRF protection enabled
 - Regular dependency updates
 - Input sanitization where applicable
 
-## Browser Support
+## Environment Variables
 
-- Chrome (last 2 versions)
-- Firefox (last 2 versions)
-- Safari (last 2 versions)
-- Edge (last 2 versions)
-- Mobile browsers (iOS Safari, Chrome Android)
+The following environment variables are supported:
+
+### Required for OAuth Authentication
+- `NEXTAUTH_SECRET` - Secret for encrypting JWT tokens
+- `KEYCLOAK_CLIENT_ID` - Keycloak client ID
+- `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret
+- `KEYCLOAK_ISSUER` - Keycloak realm URL
+
+### Optional
+- `NEXTAUTH_URL` - Base URL for NextAuth (auto-detected in most cases)
+
+Set these in the **Vars** section of the v0 in-chat sidebar or in your deployment platform's environment variable settings.
 
 ## License
 

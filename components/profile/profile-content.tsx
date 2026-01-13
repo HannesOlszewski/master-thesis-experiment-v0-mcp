@@ -3,15 +3,17 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import type { User as NextAuthUser } from "next-auth"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface ProfileContentProps {
   user: NextAuthUser
+  isDemo?: boolean
 }
 
-export function ProfileContent({ user }: ProfileContentProps) {
+export function ProfileContent({ user, isDemo = false }: ProfileContentProps) {
   const initials =
     user.name
       ?.split(" ")
@@ -30,6 +32,16 @@ export function ProfileContent({ user }: ProfileContentProps) {
           </Button>
           <h1 className="text-3xl font-bold text-[#6B8E7F]">Profile</h1>
         </div>
+
+        {isDemo && (
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertCircle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <strong>Demo Mode:</strong> You're viewing a demo profile. Deploy to Vercel to enable full OAuth
+              authentication with Keycloak.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card className="shadow-lg">
           <CardHeader className="text-center">
@@ -59,6 +71,10 @@ export function ProfileContent({ user }: ProfileContentProps) {
                 <div className="flex justify-between py-2 border-b">
                   <span className="font-medium">Name</span>
                   <span className="text-muted-foreground">{user.name || "N/A"}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b">
+                  <span className="font-medium">Account Type</span>
+                  <span className="text-muted-foreground">{isDemo ? "Demo Account" : "OAuth Account"}</span>
                 </div>
               </div>
             </div>
